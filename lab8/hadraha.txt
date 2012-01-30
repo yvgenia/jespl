@@ -1,0 +1,5 @@
+fork()
+open(...)
+dup2(1,fd)
+dup2(0,fd)
+

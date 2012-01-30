@@ -1,0 +1,30 @@
+grep -l atoi x.c y.c
+-w
+-n
+-A
+
+
+  chmod +x findfun   מאפשר הרצה
+
+#! /bin/sh
+x=`ls`    ( מציב את הפלט של התכנה)
+echo $x
+
+
+xargs
+
+
+
+pid= fork();
+if (pid){
+   wait();
+} else {
+   execvp();
+}
+execvp();
+printf("error ");
+
+אחרי execvp אנחנו עוברים להמשך התכנית (" printf("error רק אם ה-execvp לא עבד.
+מ-fork יוצאים פעמיים ומ-execvp לא יוצאים.
+אם pid אז אנחנו באבא, אחרת אנחנו בבן.
+הפעולה ()wait משהה את פעילות האבא עד שהבן מסתיים.

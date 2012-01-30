@@ -1,0 +1,9 @@
+#! /bin/sh
+
+files=`find $1 -name "*.c" | xargs grep -lw $2`
+for file in $files; do
+  echo $file
+  echo =============================================
+  grep -A 6 -n -w $2 $file
+  echo =============================================
+done

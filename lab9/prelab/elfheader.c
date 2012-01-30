@@ -1,0 +1,220 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <string.h>
+#include <elf.h>
+#include <unistd.h>
+/*
+#define EI_NIDENT (16)
+
+
+typedef unsigned short ELF32_Half;
+typedef unsigned int ELF32_Addr;
+typedef unsigned int ELF32_Off;
+typedef unsigned int ELF32_Word;
+
+
+typedef struct
+{
+  unsigned char	e_ident[EI_NIDENT];	/* Magic number and other info */
+//  ELF32_Half	e_type;			/* Object file type */
+//  ELF32_Half	e_machine;		/* Architecture */
+//  ELF32_Word	e_version;		/* Object file version */
+//  ELF32_Addr	e_entry;		/* Entry point virtual address */
+//  ELF32_Off	e_phoff;		/* Program header table file offset */
+//  ELF32_Off	e_shoff;		/* Section header table file offset */
+//  ELF32_Word	e_flags;		/* Processor-specific flags */
+//  ELF32_Half	e_ehsize;		/* ELF header size in bytes */
+//  ELF32_Half	e_phentsize;		/* Program header table entry size */
+//  ELF32_Half	e_phnum;		/* Program header table entry count */
+//  ELF32_Half	e_shentsize;		/* Section header table entry size */
+//  ELF32_Half	e_shnum;		/* Section header table entry count */
+//  ELF32_Half	e_shstrndx;		/* Section header string table index */
+//} ELF32_Ehdr;
+
+
+
+int main (int argc, char * argv[]){
+
+	int fd,i,j,k,p,option;
+	int Sflag=0;
+	int sec_offset;
+	
+	Elf32_Ehdr header;
+	Elf32_Shdr sec_header;
+	
+	while ((option = getopt(argc, argv, ":S")) != -1) {
+		switch (option) {
+		    case 'S':
+			Sflag=1;
+			break;
+		    break;
+		}
+	}
+	
+	if(Sflag){
+	        if((fd = open(argv[2], O_RDONLY)) < 0 ) {
+		    perror("error in open");
+		    exit(-1);
+		}
+	} else {
+		if( (fd = open(argv[1], O_RDONLY)) < 0 ) {
+		perror("error in open");
+		exit(-1);
+		}
+	}
+	
+	read(fd,&header,sizeof(header));
+	
+	if (header.e_ident[EI_CLASS]==1){
+	  
+    
+	    // magic number
+	    printf("Magic: ");
+	    for (i=0; i<16; ++i)
+		printf("%x ",header.e_ident[i]);
+	    printf("\n");
+	    
+	    // class
+	    printf("Class: ");
+	    switch (header.e_ident[EI_CLASS]) {
+	      case 0:
+		  printf("Invalid class \n");
+		  break;
+	      case 1:
+		  printf("ELF32 \n");
+		  break;
+	      case 2:
+		  printf("ELF64 \n");
+		  break;
+	      break;
+	    }
+	    
+	    // data
+	    printf("Data: ");
+	    switch (header.e_ident[EI_DATA]) {
+	      case 0:
+		  printf("Invalid data encoding \n");
+		  break;
+	      case 1:
+		  printf("2's complement, little endian \n");
+		  break;
+	      case 2:
+		  printf("2's complement, big endian \n");
+		  break;
+	      break;
+	    }
+	    
+	    // version
+	    printf("Version: ");
+	    if (header.e_ident[EI_VERSION]==0)
+		printf("Invalid version\n");
+	    else if (header.e_ident[EI_VERSION]>0){
+		printf("%d (current)\n",header.e_ident[EI_VERSION]);  
+	    }
+		    
+	    // type
+	    printf("Type: ");
+	    switch (header.e_type) {
+	      case 0:
+		  printf("No file type \n");
+		  break;
+	      case 1:
+		  printf("Relocatable file \n");
+		  break;
+	      case 2:
+		  printf("Executable file \n");
+		  break;
+	      case 3:
+		  printf("Shared object file \n");
+		  break;
+	      case 4:
+		  printf("Core file \n");
+		  break;	      
+	      case 0xff00:
+		  printf("Processor-specific \n");
+		  break;
+	      case 0xffff:
+		  printf("Processor-specific \n");
+		  break;
+	      break;
+	    }
+	    
+	    // machine
+	    printf("Machine: ");
+	    switch (header.e_machine) {
+	      case 0:
+		  printf("No machine \n");
+		  break;
+	      case 1:
+		  printf("AT&T WE 32100 \n");
+		  break;
+	      case 2:
+		  printf("SPARC \n");
+		  break;
+	      case 3:
+		  printf("Intel 80386 \n");
+		  break;
+	      case 4:
+		  printf("Motorola 68000 \n");
+		  break;	      
+	      case 5:
+		  printf("Motorola 88000 \n");
+		  break;
+	      case 7:
+		  printf("Intel 80860 \n");
+		  break;
+	      case 8:
+		  printf("MIPS RS3000 \n");
+		  break;
+	      break;
+	    }
+	    
+	    // Version (2)
+	    printf ("Version: \n");
+	    
+	    
+	    // entry
+	    printf ("Entry point address: 0x%x\n",header.e_entry);
+	    
+	    // program header offset
+	    printf ("Start of programs headers: %d (bytes into file)\n",header.e_phoff);
+	    
+	    // section header offset
+	    printf ("Start of section headers: %d (bytes into file)\n",header.e_shoff);
+	    
+	    if (Sflag){
+		
+		read(fd,&sec_header,header.e_shentsize);	     
+	      
+		char sec_names[sec_header.sh_size];
+		int name;
+		
+	        sec_offset= header.e_shoff;
+		
+		lseek(fd,header.e_shstrndx,0);
+		read(fd,&sec_names,sec_header.sh_size);
+		
+		printf("%s\n",sec_names);
+		
+		for (j=1; j<=header.e_shnum; ++j){
+			lseek(fd,sec_offset,0);
+			read(fd,&sec_header,header.e_shentsize);
+			sec_offset= sec_offset+ header.e_shentsize;
+			
+			name= sec_header.sh_name;
+			
+			printf ("Name: %d\n",sec_header.sh_name);
+			
+			/*for (k=0; k<header.e_shentsize; ++k){
+			      
+			}*/
+		}
+	    }
+	  
+	} else {
+	      printf ("incompatible class type \n");
+	}
+	
+	return 0;
+}
